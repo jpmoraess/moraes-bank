@@ -1,7 +1,10 @@
 migrateup:
-	migrate -path db/migration -database "postgres://postgres:postgres@localhost:5432/postgres" -verbose up
+	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/postgres" -verbose up
+
+sqlc:
+	sqlc generate
 
 test:
 	go test -v -cover ./...
 
-.PHONY: test
+.PHONY: migrateup sqlc test
