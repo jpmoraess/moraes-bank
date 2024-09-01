@@ -1,0 +1,3 @@
+# Moraes Bank
+
+sqlc generate
