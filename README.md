@@ -11,3 +11,7 @@ migrate create -ext sql -dir db/migration -seq init_schema
 ## sqlc
 
 sqlc generate
+
+## viper
+
+go get github.com/spf13/viper

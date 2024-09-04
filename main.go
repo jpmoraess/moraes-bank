@@ -5,21 +5,22 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jpmoraess/moraes-bank/api"
 	db "github.com/jpmoraess/moraes-bank/db/sqlc"
+	"github.com/jpmoraess/moraes-bank/util"
 	"log"
 )
 
-const (
-	connString    = "postgres://postgres:postgres@localhost:5432/postgres"
-	serverAddress = "0.0.0.0:8080"
-)
-
 func main() {
-	config, err := pgxpool.ParseConfig(connString)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config: ", err)
+	}
+
+	dbConfig, err := pgxpool.ParseConfig(config.DBSource)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +28,7 @@ func main() {
 	store := db.NewStore(pool)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server", err)
 	}
