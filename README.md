@@ -15,3 +15,9 @@ sqlc generate
 ## viper
 
 go get github.com/spf13/viper
+
+## go-mock
+
+go install go.uber.org/mock/mockgen@latest
+
+mockgen -source=db/sqlc/store.go -destination=db/mock/store.go -package=mock
