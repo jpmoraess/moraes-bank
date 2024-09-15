@@ -4,11 +4,11 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	db "github.com/jpmoraess/moraes-bank/db/sqlc"
+	"github.com/jpmoraess/moraes-bank/token"
 	"net/http"
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner"`
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
@@ -19,8 +19,9 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
@@ -61,6 +62,13 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err = errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -76,7 +84,9 @@ func (server *Server) getAccounts(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.GetAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
